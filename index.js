@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
@@ -24,9 +24,10 @@ async function run() {
 
         const db = client.db('assignment');
         const collection = db.collection('users');
+        const winterClothesCollection = db.collection('winter-clothes');
 
         // User Registration
-        app.post('/api/v1/register', async (req, res) => {
+        app.post('/api/auth/register', async (req, res) => {
             const { name, email, password } = req.body;
 
             // Check if email already exists
@@ -51,7 +52,7 @@ async function run() {
         });
 
         // User Login
-        app.post('/api/v1/login', async (req, res) => {
+        app.post('/api/auth/login', async (req, res) => {
             const { email, password } = req.body;
 
             // Find user by email
@@ -79,6 +80,55 @@ async function run() {
 
         // ==============================================================
         // WRITE YOUR CODE HERE
+
+        app.get("/api/winter-clothes", async (req, res) => {
+            const result = await winterClothesCollection.find().toArray();
+            res.send(result);
+        });
+
+        app.get("/api/winter-clothes/:id", async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const result = await winterClothesCollection.findOne(filter)
+            res.send(result);
+        });
+
+        // clothe get
+        app.post("/api/winter-clothes", async (req, res) => {
+            const clothes = req.body;
+            const result = await winterClothesCollection.insertOne(clothes);
+            res.send(result);
+        });
+
+        // clothe delete
+        app.delete("/api/winter-clothes/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await winterClothesCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        //  update
+        app.put("/api/winter-clothes/:id", async (req, res) => {
+            const id = req.params.id;
+            const clothes = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updatedUser = {
+                $set: {
+                    title: clothes.title,
+                    category: clothes.category,
+                    size: clothes.size,
+                },
+            };
+            const result = await winterClothesCollection.updateOne(
+                filter,
+                updatedUser,
+                options
+            );
+            res.send(result);
+        });
+
         // ==============================================================
 
 
