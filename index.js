@@ -25,6 +25,8 @@ async function run() {
         const db = client.db('assignment');
         const collection = db.collection('users');
         const winterClothesCollection = db.collection('winter-clothes');
+        const donorsCollection = db.collection('donors');
+        const volunteerCollection = db.collection('volunteer');
 
         // User Registration
         app.post('/api/auth/register', async (req, res) => {
@@ -129,7 +131,31 @@ async function run() {
             res.send(result);
         });
 
-        // ==============================================================
+
+        app.get("/api/donors", async (req, res) => {
+            const result = await donorsCollection.find().sort({ amount: -1 }).toArray();
+            res.send(result);
+        });
+
+        app.post("/api/donors", async (req, res) => {
+            const donors = req.body;
+            const result = await donorsCollection.insertOne(donors);
+            res.send(result);
+        });
+
+        // volunteer
+        app.get("/api/volunteer", async (req, res) => {
+            const result = await volunteerCollection.find().toArray();
+            res.send(result);
+        });
+
+        app.post("/api/volunteer", async (req, res) => {
+            const volunteer = req.body;
+            const result = await volunteerCollection.insertOne(volunteer);
+            res.send(result);
+        });
+
+        //==============================================================
 
 
         // Start the server
